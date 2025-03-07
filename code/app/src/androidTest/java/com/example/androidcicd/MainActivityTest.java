@@ -103,6 +103,11 @@ public class MainActivityTest {
 
     @Test
     public void appShouldDisplayExistingMoviesOnLaunch() {
+        try{
+            Thread.sleep(2000);
+        } catch(InterruptedException e){
+            e.printStackTrace();
+        }
         // Check that the initial data is loaded
         onView(withText("Oppenheimer")).check(matches(isDisplayed()));
         onView(withText("Barbie")).check(matches(isDisplayed()));
