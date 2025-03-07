@@ -1,5 +1,7 @@
 package com.example.androidcicd.movie;
 
+import android.widget.Toast;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,9 +56,17 @@ public class MovieProvider {
         movie.setYear(year);
         DocumentReference docRef = movieCollection.document(movie.getId());
         if (validMovie(movie, docRef)) {
-            docRef.set(movie);
-        } else {
-            throw new IllegalArgumentException("Invalid Movie!");
+            movieCollection.whereEqualTo("title", title).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!queryDocumentSnapshots.isEmpty() && !queryDocumentSnapshots.getDocuments().get(0).getId().equals(movie.getId())) {
+                    Toast.makeText(movieCollection.getFirestore().getApp().getApplicationContext(), "Title must be unique!", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Only update if the title is unique
+                    docRef.set(movie).addOnSuccessListener(aVoid ->
+                            Toast.makeText(movieCollection.getFirestore().getApp().getApplicationContext(), "Movie updated successfully!", Toast.LENGTH_SHORT).show());
+                }
+            });
+        } else{
+            Toast.makeText(movieCollection.getFirestore().getApp().getApplicationContext(), "Invalid Movie!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -64,9 +74,17 @@ public class MovieProvider {
         DocumentReference docRef = movieCollection.document();
         movie.setId(docRef.getId());
         if (validMovie(movie, docRef)) {
-            docRef.set(movie);
+            movieCollection.whereEqualTo("title", movie.getTitle()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!queryDocumentSnapshots.isEmpty()) {
+                    Toast.makeText(movieCollection.getFirestore().getApp().getApplicationContext(), "Title must be unique!", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Only proceed if the title is unique
+                    docRef.set(movie);
+                    }
+
+            });
         } else {
-            throw new IllegalArgumentException("Invalid Movie!");
+            Toast.makeText(movieCollection.getFirestore().getApp().getApplicationContext(), "Invalid Movie!", Toast.LENGTH_SHORT).show();
         }
     }
 
